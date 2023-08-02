@@ -10,7 +10,6 @@ import lombok.Data;
 public class LoginResponse {
     private String username;
     private String email;
-    private String message;
     private String accessToken;
     private String refreshToken;
     private String imageUrl;

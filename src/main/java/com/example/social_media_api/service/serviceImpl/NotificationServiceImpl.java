@@ -1,13 +1,15 @@
-package com.example.social_media_api.service;
+package com.example.social_media_api.service.serviceImpl;
 
-import com.example.social_media_api.dto.reponse.ResponseOtp;
 import com.example.social_media_api.entity.Otp;
 import com.example.social_media_api.entity.User;
-import com.example.social_media_api.event.registrationEvent.UserRegistration;
+import com.example.social_media_api.notificationEvent.registrationEvent.UserRegistrationEvent;
+import com.example.social_media_api.exception.InvalidCredentialsException;
 import com.example.social_media_api.exception.OtpException;
-import com.example.social_media_api.repository.OtpRepository;
+import com.example.social_media_api.repository.NotificationRepository;
 import com.example.social_media_api.repository.UserRepository;
+import com.example.social_media_api.service.NotificationService;
 import com.example.social_media_api.utils.RandomGeneratedValue;
+import com.example.social_media_api.utils.VerifyUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,38 +21,39 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OtpServiceImpl {
-    private final OtpRepository otpRepository;
+public class NotificationServiceImpl implements NotificationService {
+    private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final UserServiceImpl userServiceImpl;
+    private final VerifyUser verifyUser;
     private final UserRepository userRepository;
+    @Override
+    public String verifyUserOtp(String email, String otp) {
+        User user = verifyUser.verifyUserByEmail(email);
 
-    public ResponseOtp verifyUserOtp(String email, String otp) {
-        User user = userServiceImpl.verifyUserByEmail(email);
-
-        log.info("Verifying OTP:: " + user.getEmail());
-        Otp otpConfirmation = otpRepository.findByUser_EmailAndOtp(user.getEmail(), otp);
+        log.info("Verifying OTP: " + user.getEmail());
+        Otp otpConfirmation = notificationRepository.findByUser_EmailAndOtp(user.getEmail(), otp);
         System.out.println(otpConfirmation);
 
-        if (otpConfirmation != null && !isOtpExpired(otpConfirmation)) {
-            log.info(otpConfirmation.getUser().toString());
-            user.setStatus(true);
-        }
-        return ResponseOtp.builder()
-                .message("Invalid or expired OTP")
-                .localDateTime(LocalDateTime.now())
-                .build();
-    }
+        if (otpConfirmation == null && isOtpExpired(otpConfirmation)) {
+            throw new InvalidCredentialsException("invalid or Expired credential");
 
+        }
+        log.info(otpConfirmation.getUser().toString());
+        user.setStatus(true);
+        userRepository.save(user);
+        return "Activated";
+
+    }
+    @Override
     public void sendOtp(User user, String otp, Otp newOtp){
-        Otp foundOtp = otpRepository.findByUserId(user.getId());
+        Otp foundOtp = notificationRepository.findByUserId(user.getId());
 
         if(foundOtp != null){
-            otpRepository.delete(foundOtp);
+            notificationRepository.delete(foundOtp);
         }
-        otpRepository.save(newOtp);
+        notificationRepository.save(newOtp);
         log.info(otp);
-        applicationEventPublisher.publishEvent(new UserRegistration(user,otp));
+        applicationEventPublisher.publishEvent(new UserRegistrationEvent(user,otp));
     }
 
     public boolean isOtpExpired(Otp otp){
@@ -61,28 +64,27 @@ public class OtpServiceImpl {
         long otpExpiresAt = 4;
         return minutesPassed > otpExpiresAt;
     }
-
+    @Override
     public void saveOtp(Otp otp) {
-        otpRepository.save(otp);
+        notificationRepository.save(otp);
     }
+    @Override
     public Otp generateOtp(User user) {
         String otp = RandomGeneratedValue.generateRandomValues();
         return new Otp(otp, user);
     }
-    public ResponseOtp resendOtp(String email) {
+    @Override
+    public String resendOtp(String email) {
         User user;
         try {
-            user = userServiceImpl.verifyUserByEmail(email);
+            user = verifyUser.verifyUserByEmail(email);
 
             String generateOtp = RandomGeneratedValue.generateRandomValues();
             Otp newOtp = generateOtp(user);
 
             sendOtp(user, generateOtp, newOtp);
+            return generateOtp;
 
-            return ResponseOtp.builder()
-                    .message(generateOtp)
-                    .localDateTime(LocalDateTime.now())
-                    .build();
         } catch (Exception e) {
             log.info("Error resending OTP: ", e.getMessage());
             throw new OtpException("Error resending otp");

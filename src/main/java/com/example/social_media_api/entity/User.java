@@ -2,19 +2,18 @@ package com.example.social_media_api.entity;
 
 import com.example.social_media_api.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +34,8 @@ public class User implements Serializable, UserDetails {
     private String username;
     @Column(nullable = false)
     private String email;
-    private boolean status;
+    @Column(nullable = false)
+    private Boolean status;
     @Column(nullable = false)
     private String imageLinkUrl;
     @Column(nullable = false)
@@ -53,6 +53,9 @@ public class User implements Serializable, UserDetails {
     private List<User> followers;
     @ManyToMany(mappedBy = "followers")
     private List <User> following;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

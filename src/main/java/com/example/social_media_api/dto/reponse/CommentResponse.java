@@ -1,13 +1,16 @@
 package com.example.social_media_api.dto.reponse;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
-public class ResponseOtp {
+public class CommentResponse {
+    private String username;
     private String message;
-    private LocalDateTime localDateTime;
+
 }

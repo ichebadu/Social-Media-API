@@ -1,13 +1,12 @@
-package com.example.social_media_api.event.registrationEvent;
+package com.example.social_media_api.notificationEvent.registrationEvent;
 
 import com.example.social_media_api.config.MailConfig;
 import com.example.social_media_api.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +27,16 @@ public class RegistrationEventListener implements ApplicationListener<UserRegist
             throw new RuntimeException(e);
         }
     }
+
     private void otpGenerator(String user, String otp) throws MessagingException {
         MimeMessage message = mailConfig.javaMailSender().createMimeMessage();
+        messageDetails(user, otp, message);
+        mailConfig.javaMailSender().send(message);
+        log.info("OTP: " + otp);
+        log.info("Sent OTP to: " + user);
+    }
+
+    private void messageDetails(String user, String otp, MimeMessage message) throws MessagingException {
         MimeMessageHelper messageHelper = new MimeMessageHelper(message);
 
         messageHelper.setFrom("chukwu.iche@gmail.com");
@@ -43,12 +50,8 @@ public class RegistrationEventListener implements ApplicationListener<UserRegist
                 + "<p style='font-size: 16px;'>Please enter your OTP below to complete your registration:</p>"
                 + "<h1 style='font-size: 24px; margin: 20px 0;'>" + otp + "</h1>"
                 + "<p style='font-size: 16px;'>Thank you,</p>"
-                + "<p style='font-size: 16px;'> Social Media Api  </p>"
+                + "<p style='font-size: 16px;'>Social Media Api</p>"
                 + "</div>";
-
         messageHelper.setText(mailContent, true);
-        mailConfig.javaMailSender().send(message);
-        log.info(" OTP :" + otp);
-        log.info("Sent OTP", user);
     }
 }

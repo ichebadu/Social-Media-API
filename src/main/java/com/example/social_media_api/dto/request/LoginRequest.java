@@ -2,7 +2,9 @@ package com.example.social_media_api.dto.request;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
 
+@Data
 public class LoginRequest {
     @Column(name="email", nullable = false)
     @NotEmpty(message = "Enter your email")

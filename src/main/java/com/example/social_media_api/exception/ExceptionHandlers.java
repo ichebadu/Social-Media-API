@@ -42,5 +42,15 @@ public class ExceptionHandlers {
         ApiResponse<ExceptionResponse> apiResponse = new ApiResponse<>(exceptionResponse);
         return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
     }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<ExceptionResponse>> userAlreadyExistsException(UserAlreadyExistsException e){
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .message(e.getMessage())
+                .localDateTime(LocalDateTime.now())
+                .build();
+        ApiResponse<ExceptionResponse> apiResponse = new ApiResponse<>(exceptionResponse);
+        return new ResponseEntity<>(apiResponse,HttpStatus.CONFLICT);
+    }
 
 }

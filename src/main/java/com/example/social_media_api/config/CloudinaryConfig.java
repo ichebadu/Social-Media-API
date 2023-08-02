@@ -17,10 +17,11 @@ public class CloudinaryConfig {
     private static final String CLOUD_SECRET = "L8gMBYLMnYanoaWKaa7U9VzcUPA";
 
     public String imageLink(MultipartFile file, String id){
+        System.out.println(file.getName());
         Map<String, String> config = new HashMap<>();
         config.put("cloud_name", CLOUD_NAME);
-        config.put("cloud_key", CLOUD_KEY);
-        config.put("cloud_secret", CLOUD_SECRET);
+        config.put("api_key", CLOUD_KEY);
+        config.put("api_secret", CLOUD_SECRET);
         Cloudinary cloudinary = new Cloudinary(config);
         try{
             cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("public", "image_id" +id));

@@ -1,4 +1,4 @@
-package com.example.social_media_api.event.registrationEvent;
+package com.example.social_media_api.notificationEvent.registrationEvent;
 
 
 import com.example.social_media_api.entity.User;

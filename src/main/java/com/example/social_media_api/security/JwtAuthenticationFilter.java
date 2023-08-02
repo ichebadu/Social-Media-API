@@ -51,11 +51,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             log.info("userDetails from SecurityContext", userDetails);
 
-            Claims claims = jwtService.extractAllClaims(jwtAccessToken);
-            Set<?> role =new HashSet<>();
-            if(claims.containsKey("roles")){
-                role.addAll(claims.get("role", List.class));
-            }
+            //Claims claims = jwtService.extractAllClaims(jwtAccessToken);
+//            Set<?> role =new HashSet<>();
+//            if(claims.containsKey("roles")){
+//                role.addAll(claims.get("role", List.class));
+//            }
 
             if(jwtService.isTokenValid(jwtAccessToken, userDetails)){
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class RegistrationResponse {
     private String username;
     private String message;

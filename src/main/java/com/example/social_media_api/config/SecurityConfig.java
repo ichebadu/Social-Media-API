@@ -18,9 +18,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public static  final String[] WHITE_LIST_URLS = {
-            "/api/social_media_api/auth/user/login",
-            "/api/social_media_api/auth/user/sign-up",
-            "/api/social_media_api/auth/admin/sign-up",
+            "/api/v1/social-media-api/auth/**",
             "/v3/api-docs.yaml",
             "/v3/api-docs/**",
             "/swagger-ui/**",

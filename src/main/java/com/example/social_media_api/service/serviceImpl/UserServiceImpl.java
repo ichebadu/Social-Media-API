@@ -1,4 +1,4 @@
-package com.example.social_media_api.service;
+package com.example.social_media_api.service.serviceImpl;
 
 import com.example.social_media_api.config.CloudinaryConfig;
 import com.example.social_media_api.dto.reponse.LoginResponse;
@@ -7,11 +7,12 @@ import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
 import com.example.social_media_api.entity.Otp;
 import com.example.social_media_api.entity.User;
-import com.example.social_media_api.event.registrationEvent.UserRegistration;
+import com.example.social_media_api.event.registrationEvent.UserRegistrationEvent;
 import com.example.social_media_api.exception.UserAlreadyExistsException;
 import com.example.social_media_api.exception.UserNotFoundException;
 import com.example.social_media_api.repository.UserRepository;
-import com.example.social_media_api.security.JwtService;
+import com.example.social_media_api.service.OtpService;
+import com.example.social_media_api.service.UserService;
 import com.example.social_media_api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,21 +23,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private JwtService jwtService;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
     private final OtpService otpService;
     private final ApplicationEventPublisher publisher;
-
 
 
     @Override
     public RegistrationResponse registerUser(RegistrationRequest registrationRequest) {
         validateUserExistence(registrationRequest.getEmail());
+        System.out.println(registrationRequest.getPassword());
         User user = registrationRequestToAppUser(registrationRequest);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
         user.setImageLinkUrl("http://res.cloudinary.com/dknryxg72/image/upload/c_fill,h_250,w_200/image_id6495085e37060874b1d34270");
         user.setStatus(false);
 
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService{
         otpEntity.setUser(user);
         otpService.saveOtp(otpEntity);
         String otp = otpEntity.getOtp();
-        publisher.publishEvent(new UserRegistration(user, otp));
+        publisher.publishEvent(new UserRegistrationEvent(user, otp));
 
         return RegistrationResponse.builder()
                 .username(user.getUsername())
@@ -78,8 +78,4 @@ public class UserServiceImpl implements UserService{
         return modelMapper.map(registrationRequest, User.class);
     }
 
-    public User verifyUserByEmail(String email){
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not Found"));
-    }
 }

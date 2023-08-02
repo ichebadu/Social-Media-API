@@ -11,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,9 +35,9 @@ public class User implements Serializable, UserDetails {
     private String username;
     @Column(nullable = false)
     private String email;
+    private boolean status;
     @Column(nullable = false)
-    private String profilePics;
-
+    private String imageLinkUrl;
     @Column(nullable = false)
     private String password;
 

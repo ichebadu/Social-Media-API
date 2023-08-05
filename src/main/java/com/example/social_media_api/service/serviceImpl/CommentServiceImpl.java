@@ -9,12 +9,16 @@ import com.example.social_media_api.exception.CommentNotFoundException;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
 import com.example.social_media_api.notificationEvent.PostLikesAndCommentNotification.PostNotificationService;
+import com.example.social_media_api.repository.CommentCriteriaRepository;
 import com.example.social_media_api.repository.CommentRepository;
 import com.example.social_media_api.repository.PostRepository;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.service.CommentService;
+import com.example.social_media_api.utils.CommentCriteriaSearch;
+import com.example.social_media_api.utils.CommentPage;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,8 +35,8 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
-
     private final PostNotificationService postNotificationService;
+    private final CommentCriteriaRepository commentCriteriaRepository;
 
     @Override
     public CommentResponse createComment( Long postId, CommentRequest request) {
@@ -73,15 +77,11 @@ public class CommentServiceImpl implements CommentService {
 
         return modelMapper.map(comment, CommentResponse.class);
     }
-
     @Override
-    public List<CommentResponse> getAllCommentsByPostId(Long postId) {
-        List<Comment> comments = commentRepository.findAllByPost_Id(postId);
-        if (comments.isEmpty()) {
-            throw new PostNotFoundException("No comments found for the given post ID");
-        }
+    public List<CommentResponse> getAllCommentsByPostId(Long postId, CommentPage commentPage, CommentCriteriaSearch commentSearchCriteria) {
+        Page<Comment> commentPageResult = commentCriteriaRepository.findAllWithFilter(commentPage, commentSearchCriteria);
 
-        return comments.stream()
+        return commentPageResult.getContent().stream()
                 .map(comment -> modelMapper.map(comment, CommentResponse.class))
                 .collect(Collectors.toList());
     }
@@ -100,9 +100,18 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponse deleteComment(Long id) {
-        Comment comment = commentRepository.findById(id)
+    public CommentResponse deleteComment(Long postId, Long commentId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
+
+        // Check if the comment belongs to the specified post
+        if (!comment.getPost().getId().equals(post.getId())) {
+            throw new IllegalArgumentException("Comment does not belong to the specified post");
+        }
+
         commentRepository.delete(comment);
 
         return CommentResponse.builder()

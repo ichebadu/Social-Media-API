@@ -6,11 +6,15 @@ import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
+import com.example.social_media_api.repository.PostCriteriaRepository;
 import com.example.social_media_api.repository.PostRepository;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.service.PostService;
+import com.example.social_media_api.utils.PostCriteriaSearch;
+import com.example.social_media_api.utils.PostPage;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +30,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PostCriteriaRepository postCriteriaRepository;
 
     public PostResponse createPost(PostRequest postRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -46,26 +51,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse incrementLikes(Long postId) {
+    public PostResponse likeOrUnlike(Long postId, boolean like) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
         int likesCount = post.getLikesCount();
-        post.setLikesCount(likesCount + 1);
-
-        postRepository.save(post);
-
-        return modelMapper.map(post, PostResponse.class);
-    }
-
-    @Override
-    public PostResponse decrementLikes(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        int likesCount = post.getLikesCount();
-        if (likesCount > 0) {
-            post.setLikesCount(likesCount - 1);
+        if (like) {
+            post.setLikesCount(likesCount + 1);
+        } else {
+            if (likesCount > 0) {
+                post.setLikesCount(likesCount - 1);
+            }
         }
 
         postRepository.save(post);
@@ -80,13 +76,16 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(post, PostResponse.class);
     }
 
+
     @Override
-    public List<PostResponse> getAllPosts() {
-        List<Post> posts = postRepository.findAll();
-        return posts.stream()
+    public List<PostResponse> getAllPosts(PostPage postPage, PostCriteriaSearch postSearchCriteria) {
+        Page<Post> postPageResult = postCriteriaRepository.findAllWithFilter(postPage, postSearchCriteria);
+
+        return postPageResult.getContent().stream()
                 .map(post -> modelMapper.map(post, PostResponse.class))
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public PostResponse updatePost(Long id, PostRequest postRequest) {
@@ -94,6 +93,7 @@ public class PostServiceImpl implements PostService {
 
         post.setContent(postRequest.getContent());
         postRepository.save(post);
+
 
         return PostResponse.builder()
                 .message("Post updated successfully")

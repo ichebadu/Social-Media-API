@@ -56,6 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
         applicationEventPublisher.publishEvent(new UserRegistrationEvent(user,otp));
     }
 
+    @Override
     public boolean isOtpExpired(Otp otp){
         LocalDateTime otpCreatedAt = otp.getOtpExpiresAt();
         LocalDateTime currentDateTime = LocalDateTime.now();

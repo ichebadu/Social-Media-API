@@ -14,15 +14,19 @@ import com.example.social_media_api.exception.*;
 import com.example.social_media_api.notificationEvent.PostLikesAndCommentNotification.PostNotificationService;
 import com.example.social_media_api.notificationEvent.registrationEvent.UserRegistrationEvent;
 import com.example.social_media_api.repository.PostRepository;
+import com.example.social_media_api.repository.UserCriteriaRepository;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.security.JwtService;
 import com.example.social_media_api.service.NotificationService;
 import com.example.social_media_api.service.UserService;
+import com.example.social_media_api.utils.UserPage;
+import com.example.social_media_api.utils.UserSearchCriteria;
 import com.example.social_media_api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,6 +49,7 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final PostRepository postRepository;
     private final PostNotificationService postNotificationService;
+    private final UserCriteriaRepository userCriteriaRepository;
 
 
     @Override
@@ -212,6 +217,15 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
     }
+    @Override
+    public Page<User> getUser (UserPage userPage,
+                               UserSearchCriteria userSearchCriteria){
+        return userCriteriaRepository.findAllWithFilter(userPage, userSearchCriteria);
 
+    }
 
+    @Override
+    public User addUser(User user){
+        return userRepository.save(user);
+    }
 }

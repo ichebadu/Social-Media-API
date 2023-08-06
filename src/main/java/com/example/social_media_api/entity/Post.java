@@ -13,7 +13,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -22,13 +21,13 @@ public class Post{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Builder.Default
+
     private int likesCount;
     @Column (name="content" , nullable = false)
-    @Builder.Default
+
     private String content;
     @Column (name="title" , nullable = false)
-    @Builder.Default
+
     private String title;
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();

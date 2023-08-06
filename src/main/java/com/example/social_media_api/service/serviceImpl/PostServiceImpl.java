@@ -41,14 +41,13 @@ public class PostServiceImpl implements PostService {
         User user = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        Post post =  Post.builder()
-                .createdAt(LocalDateTime.now())
-                .title(postRequest.getTitle())
-                .content(postRequest.getContent())
-                .likesCount(0)
-                .user(user)
+        Post post =  new Post();
+        post.setCreatedAt(LocalDateTime.now());
+               post.setTitle(postRequest.getTitle());
+                       post.setContent(postRequest.getContent());
+                       post.setLikesCount(0);
+                               post.setUser(user);
 
-                .build();
 
         postRepository.save(post);
 

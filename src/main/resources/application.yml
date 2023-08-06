@@ -5,7 +5,7 @@ jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://posgtres:5432/socialmediaapi
+    url: jdbc:postgresql://postgres:5432/socialmediaapi
     password: root
     username: postgres
     driver-class-name: org.postgresql.Driver
@@ -15,7 +15,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: postgresql
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true

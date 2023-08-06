@@ -1,4 +1,4 @@
-package com.example.social_media_api.notificationEvent.forgotPasswordEvent;
+package com.example.social_media_api.notificationEvent.passwordEvent;
 
 import com.example.social_media_api.config.MailConfig;
 import com.example.social_media_api.entity.User;

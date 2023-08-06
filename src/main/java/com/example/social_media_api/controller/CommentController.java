@@ -35,11 +35,11 @@ public class CommentController {
             description = "Http status 201 CREATED"
     )
     @SecurityRequirement(name = "Bear Authentication")
-    public ResponseEntity<ApiResponse<CommentResponse>> createComment(
+    public ResponseEntity<ApiResponse<String>> createComment(
             @PathVariable Long postId,
             @RequestBody CommentRequest request
     ) {
-        ApiResponse<CommentResponse> apiResponse = new ApiResponse<>(commentService.createComment(postId, request));
+        ApiResponse<String> apiResponse = new ApiResponse<>(commentService.createComment(postId, request));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -52,6 +52,8 @@ public class CommentController {
             responseCode = "200",
             description = "Http status 200 SUCCESS"
     )
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<CommentResponse>> getCommentById(@PathVariable Long id) {
         ApiResponse<CommentResponse> apiResponse = new ApiResponse<>(commentService.getCommentById(id));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -66,6 +68,8 @@ public class CommentController {
             responseCode = "200",
             description = "Http status 200 SUCCESS"
     )
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getAllCommentsByPostId(
             @PathVariable Long postId,
             CommentPage commentPage,
@@ -87,11 +91,11 @@ public class CommentController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
+    public ResponseEntity<ApiResponse<String>> updateComment(
             @PathVariable Long id,
             @RequestBody CommentRequest request
     ) {
-        ApiResponse<CommentResponse> apiResponse = new ApiResponse<>(commentService.updateComment(id, request));
+        ApiResponse<String> apiResponse = new ApiResponse<>(commentService.updateComment(id, request));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -106,11 +110,11 @@ public class CommentController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<CommentResponse>> deleteComment(
+    public ResponseEntity<ApiResponse<String>> deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId
     ) {
-        ApiResponse<CommentResponse> apiResponse = new ApiResponse<>(commentService.deleteComment(postId, commentId));
+        ApiResponse<String> apiResponse = new ApiResponse<>(commentService.deleteComment(postId, commentId));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

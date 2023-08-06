@@ -44,19 +44,14 @@ public class User implements Serializable, UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_followers",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "follower_id")
-    )
-    private List<User> followers;
-    @ManyToMany(mappedBy = "followers")
-    private List <User> following;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<User> followers = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<User> following = new ArrayList<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

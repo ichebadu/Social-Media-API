@@ -14,12 +14,14 @@ import com.example.social_media_api.utils.UserPage;
 import com.example.social_media_api.utils.UserSearchCriteria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -84,12 +86,15 @@ public class UserController {
             description = "Follow/Unfollow User REST API is used to follow or unfollow another user"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    public ResponseEntity<ApiResponse<String>> followOrUnfollowUser(@RequestParam("email") String email,
-                                                                    @RequestParam("otherUserEmail") String otherUserEmail,
-                                                                    @RequestParam("follow") boolean follow) {
-        ApiResponse<String> apiResponse = new ApiResponse<>(userService.followOrUnfollowUser(email, otherUserEmail, follow));
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<String>> followOrUnfollowUser(
+            @RequestParam("otherUserEmail") String otherUserEmail,
+            @RequestParam("follow") boolean follow) {
+        ApiResponse<String> apiResponse = new ApiResponse<>(userService.followOrUnfollowUser(otherUserEmail, follow));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
 
     @GetMapping(value = "/upload-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
@@ -97,6 +102,8 @@ public class UserController {
             description = "Upload Profile Picture REST API is used to upload a user's profile picture"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<String>> uploadProfilePicture(@RequestParam("file") MultipartFile file) {
         ApiResponse<String> apiResponse = new ApiResponse<>(userService.uploadProfilePicture(file));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -108,23 +115,14 @@ public class UserController {
             description = "Get Following Users REST API is used to get the list of users followed by a user"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    public ResponseEntity<ApiResponse<List<String>>> getFollowing(@RequestParam String email) {
-        ApiResponse<List<String>> apiResponse = new ApiResponse<>(userService.getFollowing(email));
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<String>>> getFollowing() {
+        ApiResponse<List<String>> apiResponse = new ApiResponse<>(userService.getFollowing());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/like-or-unlike")
-    @Operation(
-            summary = "Like/Unlike Post REST API",
-            description = "Like/Unlike Post REST API is used to toggle the likes count of a post"
-    )
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    public ResponseEntity<ApiResponse<LikeResponse>> likeOrUnlike(@RequestParam String email,
-                                                                  @RequestParam Long postId,
-                                                                  @RequestParam boolean like) {
-        ApiResponse<LikeResponse> apiResponse = new ApiResponse<>(userService.likeOrUnlike(email, postId, like));
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
+
 
     @GetMapping("/follower")
     @Operation(
@@ -132,8 +130,10 @@ public class UserController {
             description = "Get Followers REST API is used to get the list of users following a user"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    public ResponseEntity<ApiResponse<List<String>>> getFollowers(@RequestParam String email) {
-        ApiResponse<List<String>> apiResponse = new ApiResponse<>(userService.getFollowers(email));
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<String>>> getFollowers() {
+        ApiResponse<List<String>> apiResponse = new ApiResponse<>(userService.getFollowers());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -143,6 +143,8 @@ public class UserController {
             description = "Get Users REST API is used to get a paginated list of users based on search criteria"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Page<User>>> getUsers(@Parameter(hidden = true) UserPage userPage,
                                                             @Parameter(hidden = true) UserSearchCriteria userSearchCriteria) {
         ApiResponse<Page<User>> apiResponse = new ApiResponse<>(userService.getUser(userPage, userSearchCriteria));
@@ -155,7 +157,8 @@ public class UserController {
             description = "Add User REST API is used to add a new user"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    public ResponseEntity<ApiResponse<User>> addUser(@RequestBody User user) {
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")public ResponseEntity<ApiResponse<User>> addUser(@RequestBody User user) {
         ApiResponse<User> apiResponse = new ApiResponse<>(userService.addUser(user));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

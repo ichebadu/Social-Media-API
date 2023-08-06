@@ -11,7 +11,6 @@ import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.enums.Role;
 import com.example.social_media_api.exception.*;
-import com.example.social_media_api.notificationEvent.PostLikesAndCommentNotification.PostNotificationService;
 import com.example.social_media_api.notificationEvent.registrationEvent.UserRegistrationEvent;
 import com.example.social_media_api.repository.PostRepository;
 import com.example.social_media_api.repository.UserCriteriaRepository;
@@ -48,15 +47,21 @@ public class UserServiceImpl implements UserService {
     private final ApplicationEventPublisher publisher;
     private final JwtService jwtService;
     private final PostRepository postRepository;
-    private final PostNotificationService postNotificationService;
     private final UserCriteriaRepository userCriteriaRepository;
 
 
+
     @Override
+
+
     public RegistrationResponse registerUser(RegistrationRequest registrationRequest) {
         validateUserExistence(registrationRequest.getEmail());
         System.out.println(registrationRequest.getPassword());
-        User user = registrationRequestToAppUser(registrationRequest);
+        User user = new User();
+        user.setEmail(registrationRequest.getEmail());
+        user.setUsername(registrationRequest.getUsername());
+
+
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
         user.setRole(Role.USER);
         user.setImageLinkUrl("http://res.cloudinary.com/dknryxg72/image/upload/c_fill,h_250,w_200/image_id6495085e37060874b1d34270");
@@ -75,6 +80,7 @@ public class UserServiceImpl implements UserService {
                 .message("Registration Successful")
                 .build();
     }
+
 
     @Override
     public LoginResponse authenticate(LoginRequest loginRequest) {
@@ -119,8 +125,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> getFollowers(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
+    public List<String> getFollowers() {
+        User user = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         List<User> followers = userRepository.findByFollowing(user);
@@ -128,16 +134,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> getFollowing(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
+    public List<String> getFollowing() {
+        User user = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         List<User> following = userRepository.findByFollowers(user);
         return following.stream().map(User::getEmail).collect(Collectors.toList());
     }
 
     @Override
-    public String followOrUnfollowUser(String email, String otherUserEmail, boolean follow) {
-        User currentUser = userRepository.findByEmail(email)
+    public String followOrUnfollowUser(String otherUserEmail, boolean follow) {
+        User currentUser = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         User otherUser = userRepository.findByEmail(otherUserEmail)
@@ -150,7 +156,9 @@ public class UserServiceImpl implements UserService {
         if (follow) {
             if (!currentUser.getFollowing().contains(otherUser)) {
                 currentUser.getFollowing().add(otherUser);
+                otherUser.getFollowers().add(currentUser); // Add the current user to the other user's followers
                 userRepository.save(currentUser);
+                userRepository.save(otherUser); // Save the changes to both users
                 return "Followed " + otherUser.getEmail();
             } else {
                 return "Already following " + otherUser.getEmail();
@@ -158,7 +166,9 @@ public class UserServiceImpl implements UserService {
         } else {
             if (currentUser.getFollowing().contains(otherUser)) {
                 currentUser.getFollowing().remove(otherUser);
+                otherUser.getFollowers().remove(currentUser); // Remove the current user from the other user's followers
                 userRepository.save(currentUser);
+                userRepository.save(otherUser); // Save the changes to both users
                 return "Unfollowed " + otherUser.getEmail();
             } else {
                 return "Not following " + otherUser.getEmail();
@@ -166,57 +176,21 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void notifyPostLiked(User postOwner, User liker, Post post){
-        String subject = "Post Linked Notification";
-        String message = String.format("USER %s liked your post with ID: %d", liker.getUsername(), post.getId());
-        postNotificationService.SendEmail(postOwner.getEmail(),subject,message );
-    }
+
+
     @Override
     public void validateUserExistence(String email){
         if(userRepository.existsByEmail(email)){
             throw new UserAlreadyExistsException(email);
         }
     }
-    @Override
-    public User registrationRequestToAppUser(RegistrationRequest registrationRequest) {
-        return modelMapper.map(registrationRequest, User.class);
-    }
+
     @Override
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email)
                 .orElseThrow(()-> new UserNotFoundException("User Not Found"));
     }
-    @Override
-    public LikeResponse likeOrUnlike(String email, Long postId, boolean like) {
-        User user = getUserByEmail(email);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
-        boolean userAlreadyLiked = post.getLikes().contains(user);
-
-        if ((like && !userAlreadyLiked) || (!like && userAlreadyLiked)) {
-            if (like) {
-                post.getLikes().add(user);
-                post.setLikesCount(post.getLikesCount() + 1);
-            } else {
-                post.getLikes().remove(user);
-                post.setLikesCount(post.getLikesCount() - 1);
-            }
-            postRepository.save(post);
-            String action = like ? "Liked " : "Unliked ";
-            notifyPostLiked(post.getUser(), user, post);
-            return LikeResponse.builder()
-                    .username(user.getUsername())
-                    .message(action + "post with ID: " + postId)
-                    .build();
-        } else {
-            String action = like ? "liked " : "unliked ";
-            return LikeResponse.builder()
-                    .username(user.getUsername())
-                    .message("Already " + action + "the post with ID: " + postId)
-                    .build();
-        }
-    }
     @Override
     public Page<User> getUser (UserPage userPage,
                                UserSearchCriteria userSearchCriteria){

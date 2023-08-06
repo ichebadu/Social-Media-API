@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 public class CommentRequest {
     private String content;
     private LocalDateTime createdAt;
-    private String username;
-    private Long postId;
+ 
+
 }

@@ -3,6 +3,7 @@ package com.example.social_media_api.controller;
 import com.example.social_media_api.dto.reponse.ApiResponse;
 
 import com.example.social_media_api.dto.reponse.PostResponse;
+import com.example.social_media_api.dto.reponse.PostResponseContent;
 import com.example.social_media_api.dto.request.PostRequest;
 import com.example.social_media_api.service.PostService;
 import com.example.social_media_api.utils.PostCriteriaSearch;
@@ -50,8 +51,10 @@ public class PostController {
             responseCode = "200",
             description = "Http status 200 SUCCESS"
     )
-    public ResponseEntity<ApiResponse<PostResponse>> getPostById(@PathVariable Long id) {
-        ApiResponse<PostResponse> apiResponse = new ApiResponse<>(postService.getPostById(id));
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<PostResponseContent>> getPostById(@PathVariable Long id) {
+        ApiResponse<PostResponseContent> apiResponse = new ApiResponse<>(postService.getPostById(id));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -64,12 +67,14 @@ public class PostController {
             responseCode = "200",
             description = "Http status 200 SUCCESS"
     )
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPosts(
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<PostResponseContent>>> getAllPosts(
             PostPage postPage,
             PostCriteriaSearch postSearchCriteria
     ) {
-        List<PostResponse> postList = postService.getAllPosts(postPage, postSearchCriteria);
-        ApiResponse<List<PostResponse>> apiResponse = new ApiResponse<>(postList);
+        List<PostResponseContent> postList = postService.getAllPosts(postPage, postSearchCriteria);
+        ApiResponse<List<PostResponseContent>> apiResponse = new ApiResponse<>(postList);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

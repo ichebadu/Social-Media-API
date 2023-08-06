@@ -8,7 +8,6 @@ import com.example.social_media_api.entity.User;
 import com.example.social_media_api.exception.CommentNotFoundException;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
-import com.example.social_media_api.notificationEvent.PostLikesAndCommentNotification.PostNotificationService;
 import com.example.social_media_api.repository.CommentCriteriaRepository;
 import com.example.social_media_api.repository.CommentRepository;
 import com.example.social_media_api.repository.PostRepository;
@@ -16,8 +15,10 @@ import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.service.CommentService;
 import com.example.social_media_api.utils.CommentCriteriaSearch;
 import com.example.social_media_api.utils.CommentPage;
+import com.example.social_media_api.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,16 +35,14 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final ApplicationEventPublisher publisher;
     private final ModelMapper modelMapper;
-    private final PostNotificationService postNotificationService;
+
     private final CommentCriteriaRepository commentCriteriaRepository;
 
     @Override
-    public CommentResponse createComment( Long postId, CommentRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = ((UserDetails)authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByEmail(username)
+    public String createComment( Long postId, CommentRequest request) {
+        User user = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Post post = postRepository.findById(postId)
@@ -58,16 +57,13 @@ public class CommentServiceImpl implements CommentService {
 
         notifyPostCommented(post.getUser(), user, post, request.getContent());
 
-        return CommentResponse.builder()
-                .message("Comment created successfully")
-                .username(request.getUsername())
-                .build();
+        return user.getUsername()+ " Comment created successfully";
     }
     private void notifyPostCommented(User postOwner, User commenter, Post post, String comment) {
         String subject = "Post Comment Notification";
         String message = String.format("User %s commented on your post with ID: %d. Comment: %s",
                 commenter.getUsername(), post.getId(), comment);
-        postNotificationService.SendEmail(postOwner.getEmail(), subject, message);
+       // publisher.publishEvent(new PostNotificationService(postOwner, subject, message));
     }
 
     @Override
@@ -87,20 +83,18 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponse updateComment(Long id, CommentRequest commentRequest) {
+    public String updateComment(Long id, CommentRequest commentRequest) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
         comment.setContent(commentRequest.getContent());
         commentRepository.save(comment);
 
-        return CommentResponse.builder()
-                .message("Comment updated successfully")
-                .build();
+        return "Comment updated successfully";
     }
 
     @Override
-    public CommentResponse deleteComment(Long postId, Long commentId) {
+    public String deleteComment(Long postId, Long commentId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
@@ -114,8 +108,6 @@ public class CommentServiceImpl implements CommentService {
 
         commentRepository.delete(comment);
 
-        return CommentResponse.builder()
-                .message("Comment deleted successfully")
-                .build();
+        return "Comment deleted successfully";
     }
 }

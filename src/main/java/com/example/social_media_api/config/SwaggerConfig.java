@@ -2,8 +2,10 @@ package com.example.social_media_api.config;
 
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -26,6 +28,12 @@ import org.springframework.context.annotation.Configuration;
                 description = "Spring Boot Social Media Api Documentation",
                 url = "https://github.com/ichebadu"
         )
+)
+@SecurityScheme(
+        name = "Bear Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
 )
 public class SwaggerConfig {
 

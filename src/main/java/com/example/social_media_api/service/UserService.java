@@ -21,19 +21,20 @@ public interface UserService {
 
     String uploadProfilePicture(MultipartFile file);
 
-    List<String> getFollowers(String userEmail);
 
-    List<String> getFollowing(String userEmail);
 
-    String followOrUnfollowUser(String email, String otherUserEmail, boolean follow);
+    List<String> getFollowers();
+
+    List<String> getFollowing();
+
+    String followOrUnfollowUser(String otherUserEmail, boolean follow);
 
     void validateUserExistence(String email);
 
-    User registrationRequestToAppUser(RegistrationRequest registrationRequest);
 
     User getUserByEmail(String email);
 
-    LikeResponse likeOrUnlike(String email, Long postId, boolean like);
+//    LikeResponse likeOrUnlike(Long postId, boolean like);
 
     Page<User> getUser (UserPage userPage,
                         UserSearchCriteria userSearchCriteria);

@@ -19,7 +19,7 @@ services:
     container_name: social_media_api
     restart: unless-stopped
     ports:
-      - 8010:8010  # Map the container's port 8080 to the host's port 8080 (change if needed)
+      - 8011:8011  # Map the container's port 8080 to the host's port 8080 (change if needed)
     environment:
       # Add any environment variables needed for your Spring Boot application
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/socialmediaapi

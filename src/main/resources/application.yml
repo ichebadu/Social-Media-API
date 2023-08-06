@@ -5,7 +5,7 @@ jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/socialmediaapi
+    url: jdbc:postgresql://localhost:5432/socialmediaapi
     password: root
     username: postgres
     driver-class-name: org.postgresql.Driver
@@ -21,7 +21,7 @@ spring:
         format_sql: true
 
 server:
-  port: 8010
+  port: 8011
   mail:
     host: smtp.gmail.com
     port: 587

@@ -19,8 +19,8 @@ public class SecurityConfig {
 
     public static  final String[] WHITE_LIST_URLS = {
             "/api/v1/social-media-api/auth/registration",
+            "/api/v1/social-media-api/auth/resend-otp",
             "/api/v1/social-media-api/auth/verification",
-            "/api/v1/social-media-api/auth/follow-or-unfollow",
             "/api/v1/social-media-api/auth/login",
             "/v3/api-docs.yaml",
             "/v3/api-docs/**",

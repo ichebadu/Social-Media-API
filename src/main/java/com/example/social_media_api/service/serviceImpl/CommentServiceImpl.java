@@ -8,7 +8,7 @@ import com.example.social_media_api.entity.User;
 import com.example.social_media_api.exception.CommentNotFoundException;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
-import com.example.social_media_api.notificationEvent.registrationEvent.MassageNotification;
+import com.example.social_media_api.notificationEvent.CommentNotification;
 import com.example.social_media_api.repository.CommentCriteriaRepository;
 import com.example.social_media_api.repository.CommentRepository;
 import com.example.social_media_api.repository.PostRepository;
@@ -61,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
         String subject = "Post Comment Notification";
         String message = String.format("User %s commented on your post with ID: %d. Comment: %s",
                 commenter.getUsername(), post.getId(), comment);
-        publisher.publishEvent(new MassageNotification(postOwner, message, subject, commenter.getUsername()));
+        publisher.publishEvent(new CommentNotification(postOwner, message, subject, commenter.getUsername()));
     }
 
 

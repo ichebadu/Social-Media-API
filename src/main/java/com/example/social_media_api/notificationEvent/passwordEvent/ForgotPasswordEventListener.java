@@ -2,7 +2,6 @@ package com.example.social_media_api.notificationEvent.passwordEvent;
 
 import com.example.social_media_api.config.MailConfig;
 import com.example.social_media_api.entity.User;
-import com.example.social_media_api.notificationEvent.passwordEvent.UserForgotPasswordEvent;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

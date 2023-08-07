@@ -11,14 +11,16 @@ import java.util.List;
 public interface PostService {
 
     PostResponse createPost(PostRequest postRequest);
+    List<PostResponseContent> getAllPost();
 
     PostResponse likeOrUnlike(Long postId, boolean like);
 
     PostResponseContent getPostById(Long id);
 
+    List<PostResponseContent> getAllPostsPaginateSortSearch(PostPage postPage, PostCriteriaSearch postSearchCriteria);
 
-    List<PostResponseContent> getAllPosts(PostPage postPage, PostCriteriaSearch postSearchCriteria);
 
     PostResponse updatePost(Long id, PostRequest postRequest);
     PostResponse deletePost(Long id);
+
 }

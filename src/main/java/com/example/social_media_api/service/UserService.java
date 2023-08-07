@@ -3,6 +3,7 @@ package com.example.social_media_api.service;
 import com.example.social_media_api.dto.reponse.LikeResponse;
 import com.example.social_media_api.dto.reponse.LoginResponse;
 import com.example.social_media_api.dto.reponse.RegistrationResponse;
+import com.example.social_media_api.dto.reponse.UserResponse;
 import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
 import com.example.social_media_api.entity.User;
@@ -21,8 +22,6 @@ public interface UserService {
 
     String uploadProfilePicture(MultipartFile file);
 
-
-
     List<String> getFollowers();
 
     List<String> getFollowing();
@@ -30,14 +29,12 @@ public interface UserService {
     String followOrUnfollowUser(String otherUserEmail, boolean follow);
 
     void validateUserExistence(String email);
+    List<UserResponse> getAllUsers();
 
 
     User getUserByEmail(String email);
 
-//    LikeResponse likeOrUnlike(Long postId, boolean like);
-
     Page<User> getUser (UserPage userPage,
                         UserSearchCriteria userSearchCriteria);
 
-    User addUser(User user);
 }

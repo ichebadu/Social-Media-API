@@ -1,13 +1,12 @@
 package com.example.social_media_api.service.serviceImpl;
 
 import com.example.social_media_api.config.CloudinaryConfig;
-import com.example.social_media_api.dto.reponse.LikeResponse;
 import com.example.social_media_api.dto.reponse.LoginResponse;
 import com.example.social_media_api.dto.reponse.RegistrationResponse;
+import com.example.social_media_api.dto.reponse.UserResponse;
 import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
 import com.example.social_media_api.entity.Otp;
-import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.enums.Role;
 import com.example.social_media_api.exception.*;
@@ -199,7 +198,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUser(User user){
-        return userRepository.save(user);
+    public List<UserResponse> getAllUsers(){
+        return userRepository.findAll()
+                .stream()
+                .map((c)-> modelMapper.map(c, UserResponse.class)).collect(Collectors.toList());
     }
 }

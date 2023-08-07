@@ -7,11 +7,11 @@ import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
+import com.example.social_media_api.notificationEvent.PostEmailNotification;
 import com.example.social_media_api.repository.PostCriteriaRepository;
 import com.example.social_media_api.repository.PostRepository;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.service.PostService;
-import com.example.social_media_api.service.UserService;
 import com.example.social_media_api.utils.PostCriteriaSearch;
 import com.example.social_media_api.utils.PostPage;
 import com.example.social_media_api.utils.UserUtils;
@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    //private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
     private final ModelMapper modelMapper;
     private final PostCriteriaRepository postCriteriaRepository;
 
@@ -52,7 +52,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         return PostResponse.builder()
-                .message("Post created successfully")
+                .message(post.getUser() + ": your Post has been created successfully")
                 .build();
     }
 
@@ -60,6 +60,7 @@ public class PostServiceImpl implements PostService {
     public PostResponse likeOrUnlike(Long postId, boolean like) {
         User user = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
                 .orElseThrow(() -> new UserNotFoundException("USER NOT FOUND"));
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
@@ -71,6 +72,7 @@ public class PostServiceImpl implements PostService {
             post.getLikes().add(user);
             postRepository.save(post);
             notifyPostLiked(post.getUser(), user, post);
+
         } else {
             if (likesCount > 0) {
                 post.setLikesCount(likesCount - 1);
@@ -79,16 +81,17 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-
         return PostResponse.builder()
-                .message("like created successfully")
+                .message(post.getUser() + "like created successfully")
                 .build();
     }
-    public void notifyPostLiked(User postOwner, User liker, Post post){
-        String subject = "Post Linked Notification";
-        String message = String.format("USER %s liked your post with ID: %d", liker.getUsername(), post.getId());
-        //publisher.publishEvent(new PostNotificationService(postOwner.getEmail(),subject,message ));
+
+    public void notifyPostLiked(User postOwner, User likes, Post post) {
+        String subject = "Post Liked Notification";
+        String message = String.format("USER %s liked your post with ID: %d", postOwner.getUsername(), post.getId());
+        publisher.publishEvent(new PostEmailNotification(postOwner, subject, message, likes));
     }
+
 
     @Override
     public PostResponseContent getPostById(Long id) {
@@ -97,9 +100,16 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(post, PostResponseContent.class);
     }
 
-
     @Override
-    public List<PostResponseContent> getAllPosts(PostPage postPage, PostCriteriaSearch postSearchCriteria) {
+    public List<PostResponseContent> getAllPostsPaginateSortSearch(PostPage postPage, PostCriteriaSearch postSearchCriteria) {
+
+        if (postPage.getPageSize() <= 0) {
+            postPage.setPageSize(10);
+        }
+        if (postPage.getPageNumber() < 0) {
+            postPage.setPageNumber(0);
+        }
+
         Page<Post> postPageResult = postCriteriaRepository.findAllWithFilter(postPage, postSearchCriteria);
 
         return postPageResult.getContent().stream()
@@ -117,7 +127,7 @@ public class PostServiceImpl implements PostService {
 
 
         return PostResponse.builder()
-                .message("Post updated successfully")
+                .message(post.getId() + "Post updated successfully")
                 .build();
     }
 
@@ -126,8 +136,17 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException("Post not found"));
         postRepository.delete(post);
         return PostResponse.builder()
-                .message("deleted successfully")
+                .message(post.getTitle() + "deleted successfully")
                 .build();
     }
+    @Override
+    public List<PostResponseContent> getAllPost(){
+        User postUser = userRepository.findByEmail(UserUtils.getUserEmailFromContext())
+                .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
+       return postUser.getPosts()
+               .stream()
+               .map((c)-> modelMapper.map(c,PostResponseContent.class)).collect(Collectors.toList());
+    }
+
 }
 

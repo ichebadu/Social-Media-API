@@ -42,7 +42,7 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getPostById/{id}")
     @Operation(
             summary = "Get Post REST API",
             description = "Get Post REST API is used to get a particular post from the database"
@@ -58,10 +58,10 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/getUserAllPostsPaginationSortingSearch")
     @Operation(
-            summary = "Get All Post REST API",
-            description = "Get All Post REST API is used to get all posts from the database"
+            summary = "Get All Post By Pagination, Sorting and Criteria Searching REST API",
+            description = "Get All Post By using Pagination, Sorting and Criteria Searching REST API from the database"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
@@ -73,12 +73,12 @@ public class PostController {
             PostPage postPage,
             PostCriteriaSearch postSearchCriteria
     ) {
-        List<PostResponseContent> postList = postService.getAllPosts(postPage, postSearchCriteria);
+        List<PostResponseContent> postList = postService.getAllPostsPaginateSortSearch(postPage, postSearchCriteria);
         ApiResponse<List<PostResponseContent>> apiResponse = new ApiResponse<>(postList);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     @Operation(
             summary = "Update Post REST API",
             description = "Update Post REST API is used to update a post in the database"
@@ -93,7 +93,27 @@ public class PostController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+
+    @GetMapping("/getAllUserPost")
+    @Operation(
+            summary = "Get All User Post REST API",
+            description = "Get All User Post By REST API is used to get all posts from the database"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Http status 200 SUCCESS"
+    )
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<PostResponseContent>>> getAllUserPost(
+
+    ) {
+        List<PostResponseContent> postList = postService.getAllPost();
+        ApiResponse<List<PostResponseContent>> apiResponse = new ApiResponse<>(postList);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
     @Operation(
             summary = "Delete Post REST API",
             description = "Delete Post REST API is used to delete a particular post from the database"

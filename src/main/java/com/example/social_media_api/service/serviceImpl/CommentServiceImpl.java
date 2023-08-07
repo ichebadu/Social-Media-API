@@ -8,6 +8,7 @@ import com.example.social_media_api.entity.User;
 import com.example.social_media_api.exception.CommentNotFoundException;
 import com.example.social_media_api.exception.PostNotFoundException;
 import com.example.social_media_api.exception.UserNotFoundException;
+import com.example.social_media_api.notificationEvent.CommentNotification;
 import com.example.social_media_api.repository.CommentCriteriaRepository;
 import com.example.social_media_api.repository.CommentRepository;
 import com.example.social_media_api.repository.PostRepository;
@@ -20,9 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -63,8 +61,9 @@ public class CommentServiceImpl implements CommentService {
         String subject = "Post Comment Notification";
         String message = String.format("User %s commented on your post with ID: %d. Comment: %s",
                 commenter.getUsername(), post.getId(), comment);
-       // publisher.publishEvent(new PostNotificationService(postOwner, subject, message));
+        publisher.publishEvent(new CommentNotification(postOwner, message, subject, commenter.getUsername()));
     }
+
 
     @Override
     public CommentResponse getCommentById(Long id) {
@@ -80,6 +79,13 @@ public class CommentServiceImpl implements CommentService {
         return commentPageResult.getContent().stream()
                 .map(comment -> modelMapper.map(comment, CommentResponse.class))
                 .collect(Collectors.toList());
+    }
+    @Override
+    public List<CommentResponse> getCommentInPost(Long id){
+        Post post = postRepository.findById(id)
+                .orElseThrow(()-> new PostNotFoundException(""));
+        return post.getComments()
+                .stream().map((c)-> modelMapper.map(c,CommentResponse.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -101,7 +107,6 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
-        // Check if the comment belongs to the specified post
         if (!comment.getPost().getId().equals(post.getId())) {
             throw new IllegalArgumentException("Comment does not belong to the specified post");
         }

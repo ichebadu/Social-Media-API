@@ -12,7 +12,9 @@ import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -55,12 +57,21 @@ public class PostCriteriaRepository {
             );
         }
 
+        if (Objects.nonNull(postCriteriaSearch.getTitle())) {
+            predicates.add(
+                    criteriaBuilder.like(postRoot.get("title"),
+                            "%" + postCriteriaSearch.getTitle() + "%")
+            );
+        }
 
-        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        // Combine the predicates with OR to search by content or title
+        return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
     }
 
-    private void setOrder(PostPage postPage, CriteriaQuery<Post> criteriaQuery, Root<Post> postRoot) {
-        if (postPage.getSortDirection().isAscending()) {
+    private void setOrder(PostPage postPage,
+                          CriteriaQuery<Post> criteriaQuery,
+                          Root<Post> postRoot) {
+        if (postPage.getSortDirection().equals(Sort.Direction.ASC)) {
             criteriaQuery.orderBy(criteriaBuilder.asc(postRoot.get(postPage.getSortBy())));
         } else {
             criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get(postPage.getSortBy())));

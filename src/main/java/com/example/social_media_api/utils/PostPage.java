@@ -5,8 +5,8 @@ import org.springframework.data.domain.Sort;
 
 @Data
 public class PostPage {
-    private int PageSize = 0;
-    private int PageNumber = 10;
+    private int pageSize = 10;
+    private int pageNumber = 0;
     private Sort.Direction sortDirection = Sort.Direction.ASC;
     private String sortBy = "title";
 }

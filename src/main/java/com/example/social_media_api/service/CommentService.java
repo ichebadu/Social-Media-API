@@ -11,6 +11,7 @@ import java.util.List;
 public interface CommentService {
 
     String createComment(Long postId, CommentRequest request);
+    List<CommentResponse> getCommentInPost(Long id);
 
     CommentResponse getCommentById(Long id);
 

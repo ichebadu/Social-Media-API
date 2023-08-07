@@ -1,6 +1,5 @@
 package com.example.social_media_api.service;
 
-import com.example.social_media_api.dto.reponse.LikeResponse;
 import com.example.social_media_api.dto.reponse.LoginResponse;
 import com.example.social_media_api.dto.reponse.RegistrationResponse;
 import com.example.social_media_api.dto.reponse.UserResponse;

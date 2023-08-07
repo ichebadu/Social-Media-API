@@ -1,9 +1,6 @@
 package com.example.social_media_api.controller;
 
-import com.example.social_media_api.dto.reponse.ApiResponse;
-import com.example.social_media_api.dto.reponse.LikeResponse;
-import com.example.social_media_api.dto.reponse.LoginResponse;
-import com.example.social_media_api.dto.reponse.RegistrationResponse;
+import com.example.social_media_api.dto.reponse.*;
 import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.OtpVerificationRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
@@ -80,6 +77,25 @@ public class UserController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/getAllUserPost")
+    @Operation(
+            summary = "Get All User REST API",
+            description = "Get All User REST API is used to get all comments for a specific post"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Http status 200 SUCCESS"
+    )
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUserPost(
+
+    ) {
+        List<UserResponse> commentList = userService.getAllUsers();
+        ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>(commentList);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @PutMapping("/follow-or-unfollow")
     @Operation(
             summary = "Follow/Unfollow User REST API",
@@ -145,21 +161,9 @@ public class UserController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<Page<User>>> getUsers(@Parameter(hidden = true) UserPage userPage,
-                                                            @Parameter(hidden = true) UserSearchCriteria userSearchCriteria) {
+    public ResponseEntity<ApiResponse<Page<User>>> getUsersByPagination(@Parameter UserPage userPage,
+                                                            @Parameter UserSearchCriteria userSearchCriteria) {
         ApiResponse<Page<User>> apiResponse = new ApiResponse<>(userService.getUser(userPage, userSearchCriteria));
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @PostMapping
-    @Operation(
-            summary = "Add User REST API",
-            description = "Add User REST API is used to add a new user"
-    )
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
-    @SecurityRequirement(name = "Bear Authentication")
-    @PreAuthorize("isAuthenticated()")public ResponseEntity<ApiResponse<User>> addUser(@RequestBody User user) {
-        ApiResponse<User> apiResponse = new ApiResponse<>(userService.addUser(user));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

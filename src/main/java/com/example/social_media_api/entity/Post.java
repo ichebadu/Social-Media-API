@@ -27,11 +27,9 @@ public class Post{
 
     private String content;
     @Column (name="title" , nullable = false)
-
     private String title;
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
-
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<User> likes = new HashSet<>();
     @JsonIgnore

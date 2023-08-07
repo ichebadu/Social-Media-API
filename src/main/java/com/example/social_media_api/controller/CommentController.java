@@ -54,14 +54,14 @@ public class CommentController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<CommentResponse>> getCommentById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CommentResponse>> getCommentByIds(@PathVariable Long id) {
         ApiResponse<CommentResponse> apiResponse = new ApiResponse<>(commentService.getCommentById(id));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/getAllCommentPostsPaginationSortingSearch")
     @Operation(
-            summary = "Get All Comments REST API",
+            summary = "Get All Comments By Pagination Sorting Searching REST API",
             description = "Get All Comments REST API is used to get all comments for a specific post"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -70,7 +70,7 @@ public class CommentController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<CommentResponse>>> getAllCommentsByPostId(
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getAllCommentsByPaginationSortingSearching(
             @PathVariable Long postId,
             CommentPage commentPage,
             CommentCriteriaSearch commentSearchCriteria
@@ -80,7 +80,26 @@ public class CommentController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @GetMapping("/getPostComment")
+    @Operation(
+            summary = "Get All Comments for a Post REST API",
+            description = "Get  Comments REST API is used to get all comments for a specific post"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Http status 200 SUCCESS"
+    )
+    @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getAllCommentsForPost(
+            @PathVariable Long postId
+    ) {
+        List<CommentResponse> commentList = commentService.getCommentInPost(postId);
+        ApiResponse<List<CommentResponse>> apiResponse = new ApiResponse<>(commentList);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/update/{id}")
     @Operation(
             summary = "Update Comment REST API",
             description = "Update Comment REST API is used to update an existing comment"
@@ -91,7 +110,7 @@ public class CommentController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<String>> updateComment(
+    public ResponseEntity<ApiResponse<String>> updateComments(
             @PathVariable Long id,
             @RequestBody CommentRequest request
     ) {
@@ -99,7 +118,7 @@ public class CommentController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/delete/{commentId}")
     @Operation(
             summary = "Delete Comment REST API",
             description = "Delete Comment REST API is used to delete a comment for a post"

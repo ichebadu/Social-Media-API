@@ -1,9 +1,12 @@
 package com.example.social_media_api.utils;
 
-import lombok.Data;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
 
-@Data
+@Getter
+@Setter
 public class PostPage {
     private int pageSize = 10;
     private int pageNumber = 0;

@@ -1,17 +1,14 @@
 package com.example.social_media_api.service.serviceImpl;
 
-import com.example.social_media_api.config.CloudinaryConfig;
-import com.example.social_media_api.dto.reponse.LoginResponse;
 import com.example.social_media_api.dto.reponse.RegistrationResponse;
-import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
-import com.example.social_media_api.entity.Otp;
+import com.example.social_media_api.entity.ConfirmationToken;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.enums.Role;
 import com.example.social_media_api.exception.UserAlreadyExistsException;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.security.JwtService;
-import com.example.social_media_api.service.NotificationService;
+import com.example.social_media_api.service.AuthenticationService;
 import com.example.social_media_api.utils.UserUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,15 +17,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -44,7 +35,7 @@ class UserServiceImplTest {
     private ModelMapper modelMapper;
 
     @Mock
-    private NotificationService notificationService;
+    private AuthenticationService authenticationService;
 
     @Mock
     private ApplicationEventPublisher publisher;
@@ -83,7 +74,7 @@ class UserServiceImplTest {
 
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        when(notificationService.generateOtp(any(User.class))).thenReturn(new Otp());
+        when(authenticationService.generateOtp(any(User.class))).thenReturn(new ConfirmationToken());
 
         RegistrationResponse response = userService.registerUser(registrationRequest);
 

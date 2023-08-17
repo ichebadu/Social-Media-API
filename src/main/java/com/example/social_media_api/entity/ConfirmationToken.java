@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @Table(name="otp")
-public class Otp {
+public class ConfirmationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
@@ -29,7 +29,7 @@ public class Otp {
     @JsonIgnoreProperties("otp")
     private User user;
 
-    public Otp(String otp, User user){
+    public ConfirmationToken(String otp, User user){
         this.otp = otp;
         this.user = user;
         this.otpExpiresAt = otpExpiresDate();

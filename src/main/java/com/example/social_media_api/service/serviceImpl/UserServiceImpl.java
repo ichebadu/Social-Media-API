@@ -6,16 +6,15 @@ import com.example.social_media_api.dto.reponse.RegistrationResponse;
 import com.example.social_media_api.dto.reponse.UserResponse;
 import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
-import com.example.social_media_api.entity.Otp;
+import com.example.social_media_api.entity.ConfirmationToken;
 import com.example.social_media_api.entity.User;
 import com.example.social_media_api.enums.Role;
 import com.example.social_media_api.exception.*;
 import com.example.social_media_api.notificationEvent.registrationEvent.UserRegistrationEvent;
-import com.example.social_media_api.repository.PostRepository;
 import com.example.social_media_api.repository.UserCriteriaRepository;
 import com.example.social_media_api.repository.UserRepository;
 import com.example.social_media_api.security.JwtService;
-import com.example.social_media_api.service.NotificationService;
+import com.example.social_media_api.service.AuthenticationService;
 import com.example.social_media_api.service.UserService;
 import com.example.social_media_api.utils.UserPage;
 import com.example.social_media_api.utils.UserSearchCriteria;
@@ -42,10 +41,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    private final NotificationService notificationService;
+    private final AuthenticationService authenticationService;
     private final ApplicationEventPublisher publisher;
     private final JwtService jwtService;
-    private final PostRepository postRepository;
     private final UserCriteriaRepository userCriteriaRepository;
 
 
@@ -68,10 +66,10 @@ public class UserServiceImpl implements UserService {
 
         var saveUser = userRepository.save(user);
 
-        Otp otpEntity = notificationService.generateOtp(saveUser);
-        otpEntity.setUser(user);
-        notificationService.saveOtp(otpEntity);
-        String otp = otpEntity.getOtp();
+        ConfirmationToken confirmationTokenEntity = authenticationService.generateOtp(saveUser);
+        confirmationTokenEntity.setUser(user);
+        authenticationService.saveOtp(confirmationTokenEntity);
+        String otp = confirmationTokenEntity.getOtp();
         publisher.publishEvent(new UserRegistrationEvent(user, otp));
 
         return RegistrationResponse.builder()
@@ -108,8 +106,6 @@ public class UserServiceImpl implements UserService {
                 .imageUrl(UserUtils.IMAGE_PLACEHOLDER_URL)
                 .build();
     }
-
-
 
 
     @Override
@@ -152,6 +148,7 @@ public class UserServiceImpl implements UserService {
             return "Cannot follow/unfollow yourself";
         }
 
+
         if (follow) {
             if (!currentUser.getFollowing().contains(otherUser)) {
                 currentUser.getFollowing().add(otherUser);
@@ -175,8 +172,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
-
     @Override
     public void validateUserExistence(String email){
         if(userRepository.existsByEmail(email)){
@@ -194,7 +189,6 @@ public class UserServiceImpl implements UserService {
     public Page<User> getUser (UserPage userPage,
                                UserSearchCriteria userSearchCriteria){
         return userCriteriaRepository.findAllWithFilter(userPage, userSearchCriteria);
-
     }
 
     @Override

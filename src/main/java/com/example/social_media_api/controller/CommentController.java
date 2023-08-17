@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/social-media-api/posts/{postId}/comments")
+@RequestMapping("/api/v1/social-media-api/comments")
 @Tag(name = "CRUD REST APIs for Comment Resource")
 public class CommentController {
     private final CommentService commentService;

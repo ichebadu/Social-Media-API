@@ -22,6 +22,8 @@ public class SecurityConfig {
             "/api/v1/social-media-api/auth/resend-otp",
             "/api/v1/social-media-api/auth/verification",
             "/api/v1/social-media-api/auth/login",
+            "/api/v1/social-media-api/auth/**",
+            "/api/v1/social-media-api/posts/getUserAllPostsPaginationSortingSearch",
             "/v3/api-docs.yaml",
             "/v3/api-docs/**",
             "/swagger-ui/**",

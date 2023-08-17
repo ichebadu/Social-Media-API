@@ -4,7 +4,9 @@ import com.example.social_media_api.dto.reponse.ApiResponse;
 
 import com.example.social_media_api.dto.reponse.PostResponse;
 import com.example.social_media_api.dto.reponse.PostResponseContent;
+import com.example.social_media_api.dto.reponse.SearchResponsePage;
 import com.example.social_media_api.dto.request.PostRequest;
+import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.service.PostService;
 import com.example.social_media_api.utils.PostCriteriaSearch;
 import com.example.social_media_api.utils.PostPage;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,7 +56,7 @@ public class PostController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<PostResponseContent>> getPostById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PostResponseContent>> getPostById(@PathVariable Long id){
         ApiResponse<PostResponseContent> apiResponse = new ApiResponse<>(postService.getPostById(id));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -69,12 +72,11 @@ public class PostController {
     )
     @SecurityRequirement(name = "Bear Authentication")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<PostResponseContent>>> getAllPosts(
+    public  ResponseEntity<ApiResponse<Page<Post>>> getAllPostsPaginateSortSearch (
             PostPage postPage,
-            PostCriteriaSearch postSearchCriteria
+            PostCriteriaSearch postCriteriaSearch
     ) {
-        List<PostResponseContent> postList = postService.getAllPostsPaginateSortSearch(postPage, postSearchCriteria);
-        ApiResponse<List<PostResponseContent>> apiResponse = new ApiResponse<>(postList);
+        ApiResponse<Page<Post>> apiResponse = new ApiResponse<>(postService.getAllPostsPaginateSortSearch(postPage,postCriteriaSearch));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

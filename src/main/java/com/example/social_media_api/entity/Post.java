@@ -35,7 +35,6 @@ public class Post{
     @JsonIgnore
     @ManyToOne
     private User user;
-
     @UpdateTimestamp
     private LocalDateTime createdAt;
 }

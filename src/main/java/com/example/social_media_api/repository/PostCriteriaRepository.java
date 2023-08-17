@@ -29,7 +29,8 @@ public class PostCriteriaRepository {
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
     }
 
-    public Page<Post> findAllWithFilter(PostPage postPage, PostCriteriaSearch postCriteriaSearch) {
+    public Page<Post> findAllWithFilters(PostPage postPage, PostCriteriaSearch postCriteriaSearch) {
+
         CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
         Root<Post> postRoot = criteriaQuery.from(Post.class);
         Predicate predicate = getPredicate(postCriteriaSearch, postRoot);
@@ -64,8 +65,7 @@ public class PostCriteriaRepository {
             );
         }
 
-        // Combine the predicates with OR to search by content or title
-        return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
     private void setOrder(PostPage postPage,

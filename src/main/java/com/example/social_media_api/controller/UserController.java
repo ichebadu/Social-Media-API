@@ -5,7 +5,7 @@ import com.example.social_media_api.dto.request.LoginRequest;
 import com.example.social_media_api.dto.request.OtpVerificationRequest;
 import com.example.social_media_api.dto.request.RegistrationRequest;
 import com.example.social_media_api.entity.User;
-import com.example.social_media_api.service.NotificationService;
+import com.example.social_media_api.service.AuthenticationService;
 import com.example.social_media_api.service.UserService;
 import com.example.social_media_api.utils.UserPage;
 import com.example.social_media_api.utils.UserSearchCriteria;
@@ -30,7 +30,7 @@ import java.util.List;
 @RequestMapping("/api/v1/social-media-api/auth")
 @Tag(name = "Authentication and User Actions")
 public class UserController {
-    private final NotificationService notificationService;
+    private final AuthenticationService authenticationService;
     private final UserService userService;
 
     @PostMapping("/registration")
@@ -51,7 +51,7 @@ public class UserController {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
     public ResponseEntity<ApiResponse<String>> verifyUser(@RequestBody OtpVerificationRequest request) {
-        ApiResponse<String> apiResponse = new ApiResponse<>(notificationService.verifyUserOtp(request.getEmail(), request.getOtp()));
+        ApiResponse<String> apiResponse = new ApiResponse<>(authenticationService.verifyUserOtp(request.getEmail(), request.getOtp()));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -73,7 +73,7 @@ public class UserController {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Http status 200 SUCCESS")
     public ResponseEntity<ApiResponse<String>> resendOtp(@RequestParam("email") String email) {
-        ApiResponse<String> apiResponse = new ApiResponse<>(notificationService.resendOtp(email));
+        ApiResponse<String> apiResponse = new ApiResponse<>(authenticationService.resendOtp(email));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

@@ -2,6 +2,7 @@ package com.example.social_media_api.service.serviceImpl;
 
 import com.example.social_media_api.dto.reponse.PostResponse;
 import com.example.social_media_api.dto.reponse.PostResponseContent;
+import com.example.social_media_api.dto.reponse.SearchResponsePage;
 import com.example.social_media_api.dto.request.PostRequest;
 import com.example.social_media_api.entity.Post;
 import com.example.social_media_api.entity.User;
@@ -30,10 +31,10 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
     private final ApplicationEventPublisher publisher;
     private final ModelMapper modelMapper;
     private final PostCriteriaRepository postCriteriaRepository;
+
 
     public PostResponse createPost(PostRequest postRequest) {
         System.out.println(postRequest);
@@ -101,21 +102,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseContent> getAllPostsPaginateSortSearch(PostPage postPage, PostCriteriaSearch postSearchCriteria) {
+    public Page<Post> getAllPostsPaginateSortSearch(PostPage postPage, PostCriteriaSearch postCriteriaSearch) {
 
-        if (postPage.getPageSize() <= 0) {
-            postPage.setPageSize(10);
+            return postCriteriaRepository.findAllWithFilters(postPage, postCriteriaSearch);
         }
-        if (postPage.getPageNumber() < 0) {
-            postPage.setPageNumber(0);
-        }
-
-        Page<Post> postPageResult = postCriteriaRepository.findAllWithFilter(postPage, postSearchCriteria);
-
-        return postPageResult.getContent().stream()
-                .map(post -> modelMapper.map(post, PostResponseContent.class))
-                .collect(Collectors.toList());
-    }
 
 
     @Override
